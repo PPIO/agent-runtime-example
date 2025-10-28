@@ -1,167 +1,175 @@
 # PPIO Agent Runtime - LangGraph Example
 
-A complete example demonstrating how to integrate LangGraph agents with PPIO Agent Runtime platform, featuring streaming responses and multi-turn conversation with simple memory.
+**Build AI agents with LangGraph and deploy to PPIO Agent Runtime in minutes.**
 
-## 🎯 Overview
+This example shows you how to quickly deploy an AI agent with streaming responses, multi-turn conversations, and tool integration to PPIO Agent Runtime.
 
-This project showcases a production-ready AI agent built with:
-- **LangGraph** for agent orchestration and state management
-- **LangChain** for LLM integration and tool calling
-- **PPIO Agent Runtime** for deployment and scaling
-- **DuckDuckGo Search** as an example tool
+[简体中文](README_zh.md) | English
 
-The agent supports both streaming and non-streaming responses, and maintains conversation context throughout the sandbox lifecycle for natural multi-turn interactions.
+## 📋 Table of Contents
 
-## ✨ Features
+- [What This Example Includes](#-what-this-example-includes)
+- [Quick Start](#-quick-start)
+  - [What You Need](#what-you-need)
+  - [Run Locally](#run-locally)
+  - [Deploy to PPIO Agent Runtime](#deploy-to-ppio-agent-runtime)
+- [Project Structure](#-project-structure)
+- [Agent Capabilities](#-agent-capabilities)
+- [Testing](#-testing)
+- [API Reference](#-api-reference)
+- [Troubleshooting](#-troubleshooting)
+- [Resources](#-resources)
 
-- ✅ **LangGraph integration** with tool calling
-- ✅ **Streaming & non-streaming** response support
-- ✅ **Multi-turn conversation** with simple memory
-- ✅ **DuckDuckGo search** integration
-- ✅ **Comprehensive testing** suite
-- ✅ **Production-ready** logging and error handling
+## ✨ What This Example Includes
+
+This agent example includes the following capabilities:
+
+- ✅ **Streaming responses** - Real-time token streaming for better UX
+- ✅ **Multi-turn conversations** - Automatic conversation history management
+- ✅ **Tool integration** - DuckDuckGo search capability
+- ✅ **Complete test suite** - Both local and production tests
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### What You Need
 
-- Python 3.12+
-- PPIO Platform account ([Sign up here](https://ppio.ai))
-- API keys for your chosen LLM provider
+Before starting, install these requirements:
 
-### Installation
+- **Python 3.9+** and **Node.js 20+**
+- **PPIO API Key** - [Get it from console](https://ppio.com/settings/key-management)
 
-1. Clone this repository:
+### Run Locally
+
+**1. Clone the repository**
+
 ```bash
-git clone <your-repo-url>
-cd ppio-agent-example
+git clone git@github.com:PPIO/agent-runtime-example.git
+cd agent-runtime-example
 ```
 
-2. Create and activate a virtual environment (recommended):
+**2. Create a Python virtual environment**
+
 ```bash
-# Create virtual environment
 python -m venv .venv
 
-# Activate it
-# On macOS/Linux:
+# macOS/Linux:
 source .venv/bin/activate
-# On Windows:
+
+# Windows:
 .venv\Scripts\activate
 ```
 
-3. Install dependencies:
+**3. Install Python dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configure environment variables:
+**4. Add your API keys to `.env`**
+
+Copy the example file and add your keys:
+
 ```bash
 cp .env.example .env
-# Edit .env with your actual credentials
 ```
 
-Required environment variables in `.env`:
-```bash
-# PPIO Platform Configuration
-PPIO_API_KEY=your_api_key_here
-PPIO_DOMAIN=your_domain_here
-PPIO_AGENT_ID=your_agent_id_here
-PPIO_AGENT_API_KEY=your_agent_api_key_here
-```
+Edit `.env` with these required values:
 
-### Local Running
+| Variable | Description | Where to Find It |
+|----------|-------------|------------------|
+| `PPIO_API_KEY` | Your PPIO platform API key | [PPIO Dashboard → Key Management](https://ppio.ai/settings/key-management) |
+| `PPIO_AGENT_API_KEY` | PPIO API key for LLM API calls in agent | Same dashboard |
 
-Start the agent locally for development and testing:
+**5. Start the agent locally**
+
 ```bash
 python app.py
 ```
 
-The agent will start on `http://localhost:8080`.
+The agent runs at `http://localhost:8080`. Test it:
 
-### Deploy to PPIO Platform
+```bash
+bash tests/test_local_basic.sh
+```
 
-Deploy your agent to the PPIO sandbox environment:
+You should see a JSON response with the agent's answer.
 
-1. **Install PPIO CLI** (if not already installed):
+### Deploy to PPIO Agent Runtime
+
+**1. Verify PPIO CLI is installed**
+
 ```bash
 npx ppio-sandbox-cli@beta --version
 ```
 
-2. **Configure Agent** (first-time deployment):
+**2. Configure your agent**
+
+Run the interactive configuration (first deployment only):
+
 ```bash
 npx ppio-sandbox-cli@beta agent configure
 ```
-This will guide you through an interactive configuration and generate:
-- `.ppio-agent.yaml` - Agent configuration file
-- `ppio.Dockerfile` - Docker build file
-- `.dockerignore` - Docker ignore file
 
-3. **Deploy Agent**:
+The CLI creates three files:
+- `.ppio-agent.yaml` - Agent metadata and configuration
+- `ppio.Dockerfile` - Sandbox template Dockerfile
+- `.dockerignore` - Files to exclude from Docker build
+
+**3. Deploy to PPIO cloud**
+
 ```bash
 npx ppio-sandbox-cli@beta agent launch
 ```
 
-After successful deployment, the Agent ID is saved in `.ppio-agent.yaml` under `status.agent_id`:
+After deployment succeeds, `.ppio-agent.yaml` contains your agent ID:
+
 ```yaml
 status:
   phase: deployed
-  agent_id: agent-xxxx  # ⭐ Unique identifier for your agent
+  agent_id: agent-xxxx  # ⭐ You need this ID to invoke the agent
   last_deployed: '2025-10-23T10:35:00Z'
 ```
 
-4. **Quick Test** (using CLI):
+**4. Test with CLI**
+
+Invoke your deployed agent:
+
 ```bash
-# CLI automatically reads agent_id from .ppio-agent.yaml
 npx ppio-sandbox-cli@beta agent invoke "Hello, Agent!"
 ```
 
-5. **Invoke with SDK** (recommended for production):
+The CLI reads `agent_id` automatically from `.ppio-agent.yaml`.
 
-Configure Agent ID in `.env` file:
+**5. Invoke the agent from your application with SDK**
+
+Save the Agent ID from `.ppio-agent.yaml` to `.env` file:
+
 ```bash
-PPIO_AGENT_ID=agent-xxxx  # Get from .ppio-agent.yaml status.agent_id
+PPIO_AGENT_ID=agent-xxxx  # Copy from .ppio-agent.yaml status.agent_id
 ```
 
-Use the provided test scripts:
+Test SDK invocation:
+
 ```bash
-# Basic test (non-streaming response, single-turn)
+# Non-streaming response test
 python tests/test_sandbox_basic.py
 
-# Streaming test (streaming response, single-turn)
+# Streaming response test
 python tests/test_sandbox_streaming.py
 
-# Multi-turn test (non-streaming response, multi-turn)
+# Multi-turn conversation test
 python tests/test_sandbox_multi_turn.py
-```
-
-These scripts use `ppio_sandbox.agent_runtime.AgentRuntimeClient` to invoke the deployed agent:
-
-```python
-from ppio_sandbox.agent_runtime import AgentRuntimeClient
-
-client = AgentRuntimeClient(api_key=os.getenv("PPIO_API_KEY"))
-
-# Invoke the agent
-response = await client.invoke_agent_runtime(
-    agentId=os.getenv("PPIO_AGENT_ID"),
-    payload=json.dumps({"prompt": "Hello!"}).encode(),
-    timeout=300,
-    envVars={
-        "PPIO_AGENT_API_KEY": os.getenv("PPIO_API_KEY"),
-        # Other environment variables to pass to sandbox
-    }
-)
 ```
 
 ## 📁 Project Structure
 
 ```
 ppio-agent-example/
-├── app.py                          # Main agent application
+├── app.py                          # Agent program
 ├── tests/                          # All test files
-│   ├── test_local_basic.sh         # Local basic test (non-streaming)
-│   ├── test_local_streaming.sh     # Local streaming test (single-turn)
-│   ├── test_local_multi_turn.sh    # Local multi-turn test (non-streaming)
+│   ├── test_local_basic.sh         # Local basic test
+│   ├── test_local_streaming.sh     # Local streaming response test
+│   ├── test_local_multi_turn.sh    # Local multi-turn conversation test
 │   ├── test_sandbox_basic.py       # Remote basic test
 │   ├── test_sandbox_streaming.py   # Remote streaming test
 │   └── test_sandbox_multi_turn.py  # Remote multi-turn test
@@ -171,73 +179,103 @@ ppio-agent-example/
 ├── requirements.txt
 ├── pyproject.toml
 ├── README.md
+├── README_zh.md
 └── LICENSE
 ```
 
-## 🏗️ Architecture
+## 🏗️ Agent Capabilities
 
-### Agent Capabilities
+This example agent has three main features:
 
-This is a sample AI Agent built with LangGraph, demonstrating integration with the PPIO platform. It provides the following capabilities:
+### 💬 Multi-turn conversations
 
-1. **💬 Conversation**
-   - Supports single-turn and multi-turn conversations
-   - Automatically maintains conversation history (during sandbox lifecycle)
+The agent remembers conversation history automatically. Each sandbox instance maintains its own conversation context.
 
-2. **🌐 Tool Calling**
-   - Integrated with DuckDuckGo search tool
-   - Can search the internet in real-time
+**Example conversation:**
+```
+Turn 1:
+User: "My name is Alice"
+Agent: "Nice to meet you, Alice!"
 
-3. **📡 Flexible Response**
-   - Supports streaming responses
-   - Dynamically choose response mode per request
+Turn 2 (same session):
+User: "What's my name?"
+Agent: "Your name is Alice."
+```
+
+To maintain the same session when using the SDK, pass the same `runtimeSessionId` value across requests.
+
+### 🌐 Internet search capability
+
+The agent can search DuckDuckGo when it needs current information.
+
+The LangGraph workflow handles this automatically:
+1. Agent detects when information is needed
+2. Agent calls the search tool
+3. Agent incorporates search results into the response
+
+### 📡 Streaming and non-streaming responses
+
+Each request can choose whether to return streaming data via the `streaming` parameter.
 
 ## 🧪 Testing
 
-### Local Testing (HTTP)
+### Local testing (development)
 
-Run local tests against `app.py` running on `localhost:8080`:
+Local tests run against `app.py` on `localhost:8080`.
+
+**Start the agent:**
 
 ```bash
-# 1. Start the agent in one terminal
 python app.py
+```
 
-# 2. In another terminal, run tests:
+**Run tests in another terminal:**
 
-# Basic test (non-streaming, single-turn)
+```bash
+# Basic test
 bash tests/test_local_basic.sh
 
-# Streaming test (single-turn)
+# Streaming response test
 bash tests/test_local_streaming.sh
 
-# Multi-turn conversation test (non-streaming)
+# Multi-turn conversation test
 bash tests/test_local_multi_turn.sh
 ```
 
-**Note:** Shell scripts require bash (available on macOS/Linux). Windows users can use Git Bash or WSL.
+> **Windows users:** Use Git Bash or WSL to run bash scripts.
 
-### Remote Testing (Sandbox)
+### Production testing (PPIO sandbox)
 
-Test deployed agent in PPIO sandbox environment:
+Production tests invoke the deployed agent using the SDK.
+
+**Requirements:**
+- Agent deployed with `agent launch` command
+- `PPIO_AGENT_ID` added to `.env` file
+
+**Run tests:**
 
 ```bash
-# Basic test (non-streaming)
+# Non-streaming response
 python tests/test_sandbox_basic.py
 
-# Streaming test
+# Streaming response
 python tests/test_sandbox_streaming.py
 
-# Multi-turn conversation test
+# Multi-turn conversation
 python tests/test_sandbox_multi_turn.py
 ```
 
-Make sure you have configured your PPIO credentials in `.env` before running remote tests.
+All tests should pass if the agent is configured correctly.
 
 ## 🔌 API Reference
 
-### GET /ping
+### Health check endpoint
 
-Health check endpoint.
+Check if the agent is running properly:
+
+```bash
+GET /ping
+```
 
 **Response:**
 ```json
@@ -247,11 +285,22 @@ Health check endpoint.
 }
 ```
 
-### POST /invocations
+### Agent invocation endpoint
 
-Main agent invocation endpoint.
+Send a request to the agent:
 
-**Request:**
+```bash
+POST /invocations
+```
+
+**Request body parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `prompt` | string | ✅ Yes | - | User message or question |
+| `streaming` | boolean | No | `false` | Enable streaming output |
+
+**Example request:**
 ```json
 {
   "prompt": "Tell me about AI agents",
@@ -259,19 +308,17 @@ Main agent invocation endpoint.
 }
 ```
 
-**Parameters:**
-- `prompt` (string, required): User's message/question
-- `streaming` (boolean, optional): Enable streaming response, default is `false`
-
-**Response (non-streaming):**
+**Non-streaming response:**
 ```json
 {
-  "result": "AI agents are autonomous systems..."
+  "result": "AI agents are autonomous systems that..."
 }
 ```
 
-**Response (streaming):**
+**Streaming response:**
+
 Server-Sent Events (SSE) format:
+
 ```
 data: {"chunk": "AI ", "type": "content"}
 data: {"chunk": "agents ", "type": "content"}
@@ -280,10 +327,56 @@ data: {"chunk": "are ", "type": "content"}
 data: {"chunk": "", "type": "end"}
 ```
 
+Each `data:` line contains a JSON object with the next token chunk.
+
+## 🔧 Troubleshooting
+
+### Agent doesn't remember previous messages
+
+**Cause:** Each sandbox restart creates a new conversation history.
+
+**Solution:** Use the same `runtimeSessionId` parameter in SDK calls to maintain the same sandbox instance:
+
+```python
+response = await client.invoke_agent_runtime(
+    agentId=agent_id,
+    payload=payload,
+    runtimeSessionId="unique-session-id",  # Same ID for multi-turn
+    timeout=300
+)
+```
+
+### Streaming doesn't work
+
+**Cause:** The `streaming` parameter might be missing or set to `false`.
+
+**Solution:** Ensure your request includes `"streaming": true`:
+
+```json
+{
+  "prompt": "Your question",
+  "streaming": true
+}
+```
+
+### Import errors when running locally
+
+**Cause:** Dependencies not installed or wrong Python environment.
+
+**Solution:** 
+1. Activate your virtual environment
+2. Install dependencies: `pip install -r requirements.txt`
+3. Verify installation: `pip list | grep ppio-sandbox`
+
+## 📚 Resources
+
+- [PPIO Agent Runtime Documentation](https://ppio.com/docs/sandbox/agent-runtime-introduction)
+- [PPIO Agent Sandbox Documentation](https://ppio.com/docs/sandbox/overview)
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 📚 Resources
+---
 
-- [PPIO Agent Runtime docs]()
+**Need help?** Open an issue or contact support at [ppio.ai](https://ppio.ai)

@@ -1,170 +1,175 @@
 # PPIO Agent Runtime - LangGraph 示例
 
-一个完整的示例项目，展示如何将 LangGraph 智能体集成到 PPIO Agent Runtime 平台，支持流式响应和带简单记忆的多轮对话。
+**使用 LangGraph 构建 AI Agent，并在几分钟内部署到 PPIO Agent Runtime。**
+
+这个示例向你展示如何将一个包含流式响应、多轮对话和工具集成的 AI Agent 快速部署到 PPIO Agent Runtime。
 
 [English](README.md) | 简体中文
 
-## 🎯 概述
+## 📋 目录
 
-本项目展示了一个生产就绪的 AI 智能体，使用：
-- **LangGraph** 进行智能体编排和状态管理
-- **LangChain** 进行 LLM 集成和工具调用
-- **PPIO Agent Runtime** 进行部署和扩展
-- **DuckDuckGo 搜索** 作为示例工具
+- [示例内容](#-示例内容)
+- [快速开始](#-快速开始)
+  - [准备工作](#准备工作)
+  - [本地运行](#本地运行)
+  - [部署到 PPIO Agent Runtime](#部署到-ppio-agent-runtime)
+- [项目结构](#-项目结构)
+- [Agent 能力](#-Agent能力)
+- [测试](#-测试)
+- [API 参考](#-api-参考)
+- [常见问题](#-常见问题)
+- [资源链接](#-资源链接)
 
-该智能体支持流式和非流式响应，并在沙箱生命周期内保持对话上下文，实现自然的多轮交互。
+## ✨ 示例内容
 
-## ✨ 特性
+这个 Agent 示例包含了以下能力：
 
-- ✅ **LangGraph 集成**，支持工具调用
-- ✅ **流式和非流式**响应支持
-- ✅ **多轮对话**，带简单记忆
-- ✅ **DuckDuckGo 搜索**集成
-- ✅ **完整的测试**套件
-- ✅ **生产就绪**的日志和错误处理
+- ✅ **流式响应** - 实时输出 token，提升用户体验
+- ✅ **多轮对话** - 自动管理对话历史
+- ✅ **工具集成** - DuckDuckGo 搜索功能
+- ✅ **完整测试** - 本地和生产环境测试
 
 ## 🚀 快速开始
 
-### 前置要求
+### 准备工作
 
-- Python 3.12+
-- PPIO 平台账号 ([在这里注册](https://ppio.ai))
-- 你选择的 LLM 提供商的 API 密钥
+开始之前，请安装以下环境：
 
-### 安装
+- **Python 3.9+** 和 **Node.js 20+**
+- **PPIO API 密钥** - [在控制台获取](https://ppio.com/settings/key-management)
 
-1. 克隆此仓库：
+### 本地运行
+
+**1. 克隆代码仓库**
+
 ```bash
-git clone <your-repo-url>
-cd ppio-agent-example
+git clone git@github.com:PPIO/agent-runtime-example.git
+cd agent-runtime-example
 ```
 
-2. 创建并激活虚拟环境（推荐）：
+**2. 创建 Python 虚拟环境**
+
 ```bash
-# 创建虚拟环境
 python -m venv .venv
 
-# 激活虚拟环境
-# macOS/Linux:
+# macOS/Linux：
 source .venv/bin/activate
-# Windows:
+
+# Windows：
 .venv\Scripts\activate
 ```
 
-3. 安装依赖：
+**3. 安装 Python 依赖**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. 配置环境变量：
+**4. 在 `.env` 中添加 API 密钥**
+
+复制示例文件并添加密钥：
+
 ```bash
 cp .env.example .env
-# 使用你的实际凭据编辑 .env
 ```
 
-`.env` 中需要的环境变量：
-```bash
-# PPIO 平台配置
-PPIO_API_KEY=your_api_key_here
-PPIO_DOMAIN=your_domain_here
-PPIO_AGENT_ID=your_agent_id_here
-PPIO_AGENT_API_KEY=your_agent_api_key_here
-```
+编辑 `.env` 填入以下必需的值：
 
-### 本地运行
+| 变量 | 说明 | 获取位置 |
+|------|------|----------|
+| `PPIO_API_KEY` | PPIO 平台 API 密钥 | [PPIO 控制台 → 密钥管理](https://ppio.ai/settings/key-management) |
+| `PPIO_AGENT_API_KEY` | Agent 中用来调用 LLM API 的 PPIO API 密钥 | 同上 |
 
-本地启动智能体进行开发和测试：
+**5. 在本地启动 Agent**
+
 ```bash
 python app.py
 ```
 
-智能体将在 `http://localhost:8080` 上启动。
+Agent 运行在 `http://localhost:8080`。测试一下：
 
-### 部署到 PPIO 平台
+```bash
+bash tests/test_local_basic.sh
+```
 
-将智能体部署到 PPIO 沙箱环境：
+你应该看到 Agent 返回的 JSON 响应。
 
-1. **安装 PPIO CLI**（如果尚未安装）：
+### 部署到 PPIO Agent Runtime
+
+**1. 验证 PPIO CLI 已安装**
+
 ```bash
 npx ppio-sandbox-cli@beta --version
 ```
 
-2. **配置 Agent**（首次部署时）：
+**2. 配置 Agent**
+
+运行交互式配置（仅首次部署）：
+
 ```bash
 npx ppio-sandbox-cli@beta agent configure
 ```
-这将交互式地引导你配置 Agent，并生成以下文件：
-- `.ppio-agent.yaml` - Agent 配置文件
-- `ppio.Dockerfile` - Docker 构建文件
-- `.dockerignore` - Docker 忽略文件
 
-3. **部署 Agent**：
+CLI 会创建三个文件：
+- `.ppio-agent.yaml` - Agent 元信息和配置
+- `ppio.Dockerfile` - 沙箱模板 Dockerfile
+- `.dockerignore` - 排除文件列表
+
+**3. 部署到 PPIO 云端**
+
 ```bash
 npx ppio-sandbox-cli@beta agent launch
 ```
 
-部署成功后，Agent ID 会保存在 `.ppio-agent.yaml` 的 `status.agent_id` 字段：
+部署成功后，`.ppio-agent.yaml` 包含你的 Agent ID：
+
 ```yaml
 status:
   phase: deployed
-  agent_id: agent-xxxx  # ⭐ Agent 的唯一标识
+  agent_id: agent-xxxx  # ⭐ 调用 Agent 需要这个 ID
   last_deployed: '2025-10-23T10:35:00Z'
 ```
 
-4. **快速测试**（使用 CLI）：
+**4. 使用 CLI 测试**
+
+调用已部署的 Agent：
+
 ```bash
-# CLI 会自动从 .ppio-agent.yaml 读取 agent_id
 npx ppio-sandbox-cli@beta agent invoke "Hello, Agent!"
 ```
 
-5. **使用 SDK 调用**（生产环境推荐）：
+CLI 会自动从 `.ppio-agent.yaml` 读取 `agent_id`。
 
-在 `.env` 文件中配置 Agent ID：
+**5. 在你的应用中使用 SDK 调用 Agent**
+
+将 `.ppio-agent.yaml` 中的 Agent ID 保存到 `.env` 文件中：
+
 ```bash
-PPIO_AGENT_ID=agent-xxxx  # 从 .ppio-agent.yaml 的 status.agent_id 获取
+PPIO_AGENT_ID=agent-xxxx  # 从 .ppio-agent.yaml 的 status.agent_id 复制
 ```
 
-使用提供的测试脚本：
+测试 SDK 调用：
+
 ```bash
-# 基础测试（非流式响应，单轮对话）
+# 非流式响应测试
 python tests/test_sandbox_basic.py
 
-# 流式测试（流式响应，单轮对话）
+# 流式响应测试
 python tests/test_sandbox_streaming.py
 
-# 多轮对话测试（非流式响应，多轮对话）
+# 多轮对话测试
 python tests/test_sandbox_multi_turn.py
 ```
-
-这些脚本使用 `ppio_sandbox.agent_runtime.AgentRuntimeClient` 来调用已部署的 agent：
-
-```python
-from ppio_sandbox.agent_runtime import AgentRuntimeClient
-
-client = AgentRuntimeClient(api_key=os.getenv("PPIO_API_KEY"))
-
-# 调用 agent
-response = await client.invoke_agent_runtime(
-    agentId=os.getenv("PPIO_AGENT_ID"),
-    payload=json.dumps({"prompt": "Hello!"}).encode(),
-    timeout=300,
-    envVars={
-        "PPIO_AGENT_API_KEY": os.getenv("PPIO_API_KEY"),
-        # 其他需要传递到沙箱的环境变量
-    }
-)
-```
-
 
 ## 📁 项目结构
 
 ```
 ppio-agent-example/
-├── app.py                          # 主智能体应用程序
+├── app.py                          # Agent 程序
 ├── tests/                          # 所有测试文件
-│   ├── test_local_basic.sh         # 本地基础测试（非流式）
-│   ├── test_local_streaming.sh     # 本地流式测试（单轮）
-│   ├── test_local_multi_turn.sh    # 本地多轮测试（非流式）
+│   ├── test_local_basic.sh         # 本地基础测试
+│   ├── test_local_streaming.sh     # 本地流式响应测试
+│   ├── test_local_multi_turn.sh    # 本地多轮对话测试
 │   ├── test_sandbox_basic.py       # 远程基础测试
 │   ├── test_sandbox_streaming.py   # 远程流式测试
 │   └── test_sandbox_multi_turn.py  # 远程多轮测试
@@ -178,70 +183,99 @@ ppio-agent-example/
 └── LICENSE
 ```
 
-## 🏗️ 架构
+## 🏗️ Agent 能力
 
-### Agent 功能
+这个示例 Agent 具有三个主要功能：
 
-这是一个基于 LangGraph 构建的示例 AI Agent，展示了如何集成到 PPIO 平台。它具备以下能力：
+### 💬 多轮对话
 
-1. **💬 对话能力**
-   - 支持单轮和多轮对话
-   - 自动维护对话历史（在沙箱生命周期内）
+Agent 自动记住对话历史。每个沙箱实例维护自己的对话上下文。
 
-2. **🌐 工具调用**
-   - 集成了 DuckDuckGo 搜索工具
-   - 可以实时搜索互联网信息
+**对话示例：**
+```
+第 1 轮：
+用户："我叫 Alice"
+Agent："很高兴认识你，Alice！"
 
-3. **📡 灵活响应**
-   - 支持流式响应
-   - 请求时动态选择响应模式
+第 2 轮（同一会话）：
+用户："我叫什么名字？"
+Agent："你的名字是 Alice。"
+```
+
+使用 SDK 时，传入相同的 `runtimeSessionId` 参数可以维持同一会话。
+
+### 🌐 互联网搜索能力
+
+Agent 可以在需要时搜索 DuckDuckGo 获取最新信息。
+
+LangGraph 工作流自动处理：
+1. Agent 判断是否需要信息
+2. Agent 调用搜索工具
+3. Agent 将搜索结果整合到回答中
+
+### 📡 流式和非流式响应
+
+每次请求可通过 `streaming` 参数选择是否返回流式数据。
 
 ## 🧪 测试
 
-### 本地测试（HTTP）
+### 本地测试（开发环境）
 
-针对运行在 `localhost:8080` 的 `app.py` 运行本地测试：
+本地测试针对运行在 `localhost:8080` 的 `app.py`。
+
+**启动 Agent：**
 
 ```bash
-# 1. 在一个终端启动智能体
 python app.py
+```
 
-# 2. 在另一个终端运行测试：
+**在另一个终端运行测试：**
 
-# 基础测试（非流式响应，单轮对话）
+```bash
+# 基础测试
 bash tests/test_local_basic.sh
 
-# 流式测试（流式响应，单轮对话）
+# 流式响应测试
 bash tests/test_local_streaming.sh
 
-# 多轮对话测试（非流式响应，多轮对话）
+# 多轮对话测试
 bash tests/test_local_multi_turn.sh
 ```
 
-**注意：** Shell 脚本需要 bash 环境（macOS/Linux 自带）。Windows 用户可以使用 Git Bash 或 WSL。
+> **Windows 用户：** 使用 Git Bash 或 WSL 运行 bash 脚本。
 
-### 远程测试（沙箱）
+### 生产测试（PPIO 沙箱）
 
-在 PPIO 沙箱环境中测试已部署的智能体：
+生产测试使用 SDK 调用已部署的 Agent。
+
+**前置条件：**
+- 已用 `agent launch` 命令部署 Agent
+- 已在 `.env` 文件中添加 `PPIO_AGENT_ID`
+
+**运行测试：**
 
 ```bash
-# 基础测试（非流式响应，单轮对话）
+# 非流式响应
 python tests/test_sandbox_basic.py
 
-# 流式测试（流式响应，单轮对话）
+# 流式响应
 python tests/test_sandbox_streaming.py
 
-# 多轮对话测试（非流式响应，多轮对话）
+# 多轮对话
 python tests/test_sandbox_multi_turn.py
 ```
 
-运行远程测试前，请确保已在 `.env` 中配置了你的 PPIO 凭据。
+如果 Agent 配置正确，所有测试都应通过。
 
 ## 🔌 API 参考
 
-### GET /ping
+### 健康检查端点
 
-健康检查端点。
+检查 Agent 是否正常运行：
+
+```bash
+GET /ping
+```
 
 **响应：**
 ```json
@@ -251,11 +285,22 @@ python tests/test_sandbox_multi_turn.py
 }
 ```
 
-### POST /invocations
+### Agent 调用端点
 
-主智能体调用端点。
+向 Agent 发送请求：
 
-**请求：**
+```bash
+POST /invocations
+```
+
+**请求体参数：**
+
+| 参数 | 类型 | 必需 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `prompt` | 字符串 | ✅ 是 | - | 用户消息或问题 |
+| `streaming` | 布尔值 | 否 | `false` | 启用流式输出 |
+
+**请求示例：**
 ```json
 {
   "prompt": "告诉我关于 AI 智能体的信息",
@@ -263,19 +308,17 @@ python tests/test_sandbox_multi_turn.py
 }
 ```
 
-**参数：**
-- `prompt`（字符串，必需）：用户的消息/问题
-- `streaming`（布尔值，可选）：启用流式响应，默认为 `false`
-
-**响应（非流式）：**
+**非流式响应：**
 ```json
 {
-  "result": "AI 智能体是自主系统..."
+  "result": "AI 智能体是能够自主..."
 }
 ```
 
-**响应（流式）：**
+**流式响应：**
+
 服务器发送事件（SSE）格式：
+
 ```
 data: {"chunk": "AI ", "type": "content"}
 data: {"chunk": "智能体 ", "type": "content"}
@@ -284,11 +327,57 @@ data: {"chunk": "是 ", "type": "content"}
 data: {"chunk": "", "type": "end"}
 ```
 
+每行 `data:` 包含一个带有下一个 token 的 JSON 对象。
+
+## 🔧 常见问题
+
+### Agent 不记得之前的消息
+
+**原因：** 每次沙箱重启会创建新的对话历史。
+
+**解决方法：** 在 SDK 调用中使用相同的 `runtimeSessionId` 参数来维持同一沙箱实例：
+
+```python
+response = await client.invoke_agent_runtime(
+    agentId=agent_id,
+    payload=payload,
+    runtimeSessionId="unique-session-id",  # 多轮对话使用相同 ID
+    timeout=300
+)
+```
+
+### 流式输出不工作
+
+**原因：** 可能缺少 `streaming` 参数或设置为 `false`。
+
+**解决方法：** 确保请求中包含 `"streaming": true`：
+
+```json
+{
+  "prompt": "你的问题",
+  "streaming": true
+}
+```
+
+### 本地运行时出现导入错误
+
+**原因：** 依赖未安装或 Python 环境不正确。
+
+**解决方法：** 
+1. 激活虚拟环境
+2. 安装依赖：`pip install -r requirements.txt`
+3. 验证安装：`pip list | grep ppio-sandbox`
+
+## 📚 资源链接
+
+- [PPIO Agent Runtime 文档](https://ppio.com/docs/sandbox/agent-runtime-introduction)
+- [PPIO Agent 沙箱文档](https://ppio.com/docs/sandbox/overview)
+
 ## 📄 许可证
 
 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
 
-## 📚 资源
+---
 
-- [PPIO Agent Runtime 文档]()
+**需要帮助？** 提交 issue 或访问 [ppio.ai](https://ppio.ai) 联系支持。
 
