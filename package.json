@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "ppio-sandbox-cli": "1.1.0-a31"
+    "ppio-sandbox-cli": "^1.1.0-b1"
   }
 }

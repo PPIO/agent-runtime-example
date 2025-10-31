@@ -16,16 +16,16 @@ client = PPIOAgentRuntimeClient(
 )
 
 async def main():
-  # 创建唯一的 runtimeSessionId
+  # Create unique runtimeSessionId
   runtime_session_id = str(uuid.uuid4())
   
   print("\n" + "="*80)
-  print("🔑 生成会话ID")
+  print("🔑 Generating Session ID")
   print("="*80)
   print(f"Runtime Session ID: {runtime_session_id}")
   print("="*80 + "\n")
   
-  # 定义多轮对话内容
+  # Define multi-turn conversation content
   conversation_rounds = [
     "Hello, agent! My name is Jason.",
     "Tell me something about Elon Musk.",
@@ -35,11 +35,11 @@ async def main():
   try:
     for round_num, prompt in enumerate(conversation_rounds, 1):
       print("\n" + "="*80)
-      print(f"🚀 第 {round_num} 轮对话")
+      print(f"🚀 Round {round_num}")
       print("="*80)
       
       payload = json.dumps({"prompt": prompt}).encode()
-      print(f"📤 发送 Payload: {payload.decode()}")
+      print(f"📤 Sending Payload: {payload.decode()}")
       print(f"🎯 Agent ID: {os.getenv('PPIO_AGENT_ID')}")
       print(f"🔑 Session ID: {runtime_session_id}")
       
@@ -48,33 +48,33 @@ async def main():
         payload=payload,
         timeout=300,
         envVars={"PPIO_AGENT_API_KEY": os.getenv("PPIO_AGENT_API_KEY")},
-        runtimeSessionId=runtime_session_id  # 使用相同的 sessionId
+        runtimeSessionId=runtime_session_id  # Use the same sessionId
       )
       
       print("\n" + "-"*80)
-      print(f"✅ 第 {round_num} 轮响应")
+      print(f"✅ Round {round_num} Response")
       print("-"*80)
       print(f"Response type: {type(response)}")
       print(f"Response: {response}")
       print("-"*80)
       
-      # 在下一轮对话前暂停一下
+      # Pause before next round
       if round_num < len(conversation_rounds):
-        print("\n⏳ 等待 2 秒后进入下一轮...")
+        print("\n⏳ Waiting 2 seconds before next round...")
         await asyncio.sleep(2)
     
     print("\n" + "="*80)
-    print("✅ 所有对话轮次完成")
+    print("✅ All conversation rounds completed")
     print("="*80 + "\n")
     
   except Exception as e:
     print("\n" + "="*80)
-    print("❌ 调用失败")
+    print("❌ Invocation Failed")
     print("="*80)
-    print(f"错误类型: {type(e).__name__}")
-    print(f"错误信息: {str(e)}")
+    print(f"Error type: {type(e).__name__}")
+    print(f"Error message: {str(e)}")
     import traceback
-    print("\n完整堆栈:")
+    print("\nFull traceback:")
     traceback.print_exc()
     print("="*80 + "\n")
 

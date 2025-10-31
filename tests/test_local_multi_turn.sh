@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# 测试本地多轮对话
-# 使用方法: 
-#   1. 先启动 app.py: python app.py
-#   2. 然后运行此脚本: bash test_multi_turn_local.sh
+# Multi-turn conversation test
+# Usage: 
+#   1. Start app.py: python app.py
+#   2. Run this script: bash test_multi_turn_local.sh
 
-set -e  # 遇到错误立即退出
+set -e  # Exit on error
 
-# 服务地址
+# Service configuration
 BASE_URL="http://localhost:8080"
 ENDPOINT="${BASE_URL}/invocations"
 
-# 颜色输出
+# Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -21,25 +21,25 @@ NC='\033[0m' # No Color
 
 echo ""
 echo "========================================================================"
-echo -e "${GREEN}🚀 开始测试多轮对话${NC}"
+echo -e "${GREEN}🚀 Multi-turn Conversation Test${NC}"
 echo "========================================================================"
 echo ""
 
-# 检查服务是否可用
-echo -e "${CYAN}📡 检查服务状态...${NC}"
+# Check if service is available
+echo -e "${CYAN}📡 Checking service status...${NC}"
 if curl -s -f "${BASE_URL}/ping" > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ 服务正常运行${NC}"
+    echo -e "${GREEN}✅ Service is running${NC}"
     echo ""
 else
-    echo -e "${RED}❌ 服务未启动！请先运行: python app.py${NC}"
+    echo -e "${RED}❌ Service is not running! Please start it first: python app.py${NC}"
     exit 1
 fi
 
-# 第1轮对话
+# Round 1
 echo "========================================================================"
-echo -e "${BLUE}🗣️  第 1 轮对话${NC}"
+echo -e "${BLUE}🗣️  Round 1${NC}"
 echo "========================================================================"
-echo -e "${YELLOW}📤 发送: Hello, agent! My name is Jason.${NC}"
+echo -e "${YELLOW}📤 Sending: Hello, agent! My name is Jason.${NC}"
 echo ""
 
 RESPONSE1=$(curl -s -X POST "${ENDPOINT}" \
@@ -49,18 +49,18 @@ RESPONSE1=$(curl -s -X POST "${ENDPOINT}" \
         "streaming": false
     }')
 
-echo -e "${GREEN}📥 响应:${NC}"
+echo -e "${GREEN}📥 Response:${NC}"
 echo "${RESPONSE1}" | jq -r '.result // .error // .'
 echo ""
-echo -e "${CYAN}⏳ 等待 2 秒后进入下一轮...${NC}"
+echo -e "${CYAN}⏳ Waiting 2 seconds before next round...${NC}"
 sleep 2
 echo ""
 
-# 第2轮对话
+# Round 2
 echo "========================================================================"
-echo -e "${BLUE}🗣️  第 2 轮对话${NC}"
+echo -e "${BLUE}🗣️  Round 2${NC}"
 echo "========================================================================"
-echo -e "${YELLOW}📤 发送: Tell me something interesting about Elon Musk.${NC}"
+echo -e "${YELLOW}📤 Sending: Tell me something interesting about Elon Musk.${NC}"
 echo ""
 
 RESPONSE2=$(curl -s -X POST "${ENDPOINT}" \
@@ -70,18 +70,18 @@ RESPONSE2=$(curl -s -X POST "${ENDPOINT}" \
         "streaming": false
     }')
 
-echo -e "${GREEN}📥 响应:${NC}"
+echo -e "${GREEN}📥 Response:${NC}"
 echo "${RESPONSE2}" | jq -r '.result // .error // .'
 echo ""
-echo -e "${CYAN}⏳ 等待 2 秒后进入下一轮...${NC}"
+echo -e "${CYAN}⏳ Waiting 2 seconds before next round...${NC}"
 sleep 2
 echo ""
 
-# 第3轮对话 - 测试记忆能力
+# Round 3 - Test memory capability
 echo "========================================================================"
-echo -e "${BLUE}🗣️  第 3 轮对话 (测试记忆能力)${NC}"
+echo -e "${BLUE}🗣️  Round 3 (Testing Memory)${NC}"
 echo "========================================================================"
-echo -e "${YELLOW}📤 发送: What's my name? Can you remember it?${NC}"
+echo -e "${YELLOW}📤 Sending: What's my name? Can you remember it?${NC}"
 echo ""
 
 RESPONSE3=$(curl -s -X POST "${ENDPOINT}" \
@@ -91,20 +91,20 @@ RESPONSE3=$(curl -s -X POST "${ENDPOINT}" \
         "streaming": false
     }')
 
-echo -e "${GREEN}📥 响应:${NC}"
+echo -e "${GREEN}📥 Response:${NC}"
 echo "${RESPONSE3}" | jq -r '.result // .error // .'
 echo ""
 
-# 检查是否记住名字
+# Check if name is remembered
 if echo "${RESPONSE3}" | grep -qi "jason"; then
-    echo -e "${GREEN}✅ 成功！Agent 记住了你的名字！${NC}"
+    echo -e "${GREEN}✅ Success! Agent remembered your name!${NC}"
 else
-    echo -e "${YELLOW}⚠️  警告：Agent 可能没有记住你的名字${NC}"
+    echo -e "${YELLOW}⚠️  Warning: Agent may not have remembered your name${NC}"
 fi
 
 echo ""
 echo "========================================================================"
-echo -e "${GREEN}✅ 多轮对话测试完成${NC}"
+echo -e "${GREEN}✅ Multi-turn conversation test completed${NC}"
 echo "========================================================================"
 echo ""
 

@@ -7,11 +7,11 @@ from ppio_sandbox.agent_runtime import AgentRuntimeClient as PPIOAgentRuntimeCli
 from dotenv import load_dotenv
 load_dotenv()
 
-# 强制禁用 stdout 缓冲，确保实时输出
+# Force disable stdout buffering to ensure real-time output
 sys.stdout.reconfigure(line_buffering=True)
 
-# 调试模式：显示每个 chunk 的详细信息和时间戳
-DEBUG_MODE = True  # 先启用调试模式，看看 chunk 是否实时到达
+# Debug mode: Display detailed information and timestamps for each chunk
+DEBUG_MODE = False
 
 print(os.getenv("PPIO_API_KEY"))
 print(os.getenv("PPIO_DOMAIN"))
@@ -25,17 +25,17 @@ client = PPIOAgentRuntimeClient(
 async def main():
   try:
     print("\n" + "="*80)
-    print("🚀 开始调用 Agent（流式模式）")
+    print("🚀 Starting Agent Invocation (Streaming Mode)")
     print("="*80)
     
-    # 使用 PPIO 标准字段 'stream'（不是 'streaming'）
+    # Use PPIO standard field 'stream' (not 'streaming')
     request_dict = {"prompt": "Hello, Agent! Tell me something about Elon Musk.", "streaming": True}
     payload = json.dumps(request_dict).encode()
-    print(f"📤 发送 Payload: {json.dumps(request_dict, ensure_ascii=False)}")
+    print(f"📤 Sending Payload: {json.dumps(request_dict, ensure_ascii=False)}")
     print(f"🎯 Agent ID: {os.getenv('PPIO_AGENT_ID')}")
     
-    # 使用标准的 SDK 方法
-    print("\n⏱️  调用 invoke_agent_runtime，等待首个响应...")
+    # Use standard SDK method
+    print("\n⏱️  Calling invoke_agent_runtime, waiting for first response...")
     invoke_start_time = time.time()
     
     response = await client.invoke_agent_runtime(
@@ -46,20 +46,20 @@ async def main():
     )
     
     first_response_time = time.time() - invoke_start_time
-    print(f"✅ 收到响应对象，耗时: {first_response_time:.3f}秒")
+    print(f"✅ Response object received, time elapsed: {first_response_time:.3f}s")
     
     print("\n" + "="*80)
-    print("📡 开始接收数据...")
+    print("📡 Starting to receive data...")
     print("="*80 + "\n")
     
-    # 检查响应类型
+    # Check response type
     print(f"Response type: {type(response)}")
     print(f"Has __aiter__: {hasattr(response, '__aiter__')}")
     
-    # 处理流式响应
+    # Handle streaming response
     if hasattr(response, '__aiter__'):
-      # 如果是异步迭代器（流式响应）
-      print("\n💬 Agent 回复（流式）:\n")
+      # If it's an async iterator (streaming response)
+      print("\n💬 Agent Response (Streaming):\n")
       print("-" * 80)
       chunk_count = 0
       content_count = 0
@@ -67,7 +67,7 @@ async def main():
       start_time = time.time()
       last_chunk_time = start_time
       
-      print(f"⏱️  开始迭代响应流，当前时间戳: {time.time():.3f}")
+      print(f"⏱️  Starting to iterate response stream, current timestamp: {time.time():.3f}")
       iteration_start = time.time()
       
       async for chunk in response:
@@ -77,20 +77,20 @@ async def main():
         time_since_last = current_time - last_chunk_time
         last_chunk_time = current_time
         
-        # 第一个 chunk 到达的特殊日志
+        # Special log for first chunk arrival
         if chunk_count == 1:
           time_to_first_chunk = current_time - iteration_start
-          sys.stdout.write(f"\n🎉 第一个 chunk 到达！从开始迭代到现在: {time_to_first_chunk:.3f}秒\n")
-          sys.stdout.write(f"   从 invoke 调用到现在总耗时: {current_time - invoke_start_time:.3f}秒\n\n")
+          sys.stdout.write(f"\n🎉 First chunk arrived! Time since iteration start: {time_to_first_chunk:.3f}s\n")
+          sys.stdout.write(f"   Total time since invoke call: {current_time - invoke_start_time:.3f}s\n\n")
           sys.stdout.flush()
         
         if DEBUG_MODE:
-          # 使用 sys.stdout.write 和立即 flush 确保实时输出
+          # Use sys.stdout.write and immediate flush to ensure real-time output
           debug_msg = f"\n[Chunk #{chunk_count}] +{time_since_last:.3f}s | Type: {type(chunk).__name__}\n"
           sys.stdout.write(debug_msg)
           sys.stdout.flush()
         
-        # 解析 chunk 的辅助函数
+        # Helper function to parse chunk
         def parse_and_print(data):
           nonlocal content_count
           if isinstance(data, dict):
@@ -98,7 +98,7 @@ async def main():
               content = data.get('chunk', '')
               if content:
                 content_count += 1
-                # 使用 sys.stdout.write 代替 print，确保实时输出
+                # Use sys.stdout.write instead of print to ensure real-time output
                 sys.stdout.write(content)
                 sys.stdout.flush()
                 
@@ -107,71 +107,71 @@ async def main():
                   sys.stdout.flush()
             elif data.get('type') == 'end':
               sys.stdout.write(f"\n{'-' * 80}\n")
-              sys.stdout.write(f"✅ 流式传输完成\n")
-              sys.stdout.write(f"   总数据块: {chunk_count}\n")
-              sys.stdout.write(f"   内容块: {content_count}\n")
-              sys.stdout.write(f"   总耗时: {time_since_start:.2f}秒\n")
+              sys.stdout.write(f"✅ Streaming completed\n")
+              sys.stdout.write(f"   Total chunks: {chunk_count}\n")
+              sys.stdout.write(f"   Content chunks: {content_count}\n")
+              sys.stdout.write(f"   Total time: {time_since_start:.2f}s\n")
               sys.stdout.flush()
             elif data.get('type') == 'error':
-              sys.stdout.write(f"\n❌ 错误: {data.get('error')}\n")
+              sys.stdout.write(f"\n❌ Error: {data.get('error')}\n")
               sys.stdout.flush()
           else:
             sys.stdout.write(str(data))
             sys.stdout.flush()
         
-        # 处理不同格式的 chunk
+        # Handle different chunk formats
         if isinstance(chunk, str):
-          # 字符串格式：可能是 JSON 字符串
+          # String format: might be JSON string
           try:
             data = json.loads(chunk)
             parse_and_print(data)
           except json.JSONDecodeError:
-            # 不是 JSON，直接输出
+            # Not JSON, output directly
             sys.stdout.write(chunk)
             sys.stdout.flush()
         
         elif isinstance(chunk, dict):
-          # 字典格式：可能直接是数据，或者包含嵌套的 'chunk' 键
+          # Dict format: might be data directly, or contain nested 'chunk' key
           if 'chunk' in chunk and isinstance(chunk['chunk'], str):
-            # SDK 包装格式：{'chunk': '...', ...}
+            # SDK wrapper format: {'chunk': '...', ...}
             try:
               inner_data = json.loads(chunk['chunk'])
               parse_and_print(inner_data)
             except (json.JSONDecodeError, TypeError):
-              # 不是 JSON，直接输出
+              # Not JSON, output directly
               sys.stdout.write(chunk['chunk'])
               sys.stdout.flush()
           else:
-            # 直接是数据格式
+            # Direct data format
             parse_and_print(chunk)
         
         else:
-          # 其他类型，直接输出
+          # Other types, output directly
           sys.stdout.write(str(chunk))
           sys.stdout.flush()
       
       if chunk_count == 0:
-        print("⚠️ 没有收到任何数据块")
+        print("⚠️ No data chunks received")
         
     elif isinstance(response, dict):
-      # 如果是普通响应（非流式）
-      print("\n💬 Agent 回复（非流式）:")
+      # If it's a regular response (non-streaming)
+      print("\n💬 Agent Response (Non-streaming):")
       print(json.dumps(response, indent=2, ensure_ascii=False))
     else:
-      # 其他类型
-      print("\n💬 Agent 回复（未知格式）:")
+      # Other types
+      print("\n💬 Agent Response (Unknown format):")
       print(response)
     
     print("\n" + "="*80 + "\n")
     
   except Exception as e:
     print("\n" + "="*80)
-    print("❌ 调用失败")
+    print("❌ Invocation Failed")
     print("="*80)
-    print(f"错误类型: {type(e).__name__}")
-    print(f"错误信息: {str(e)}")
+    print(f"Error type: {type(e).__name__}")
+    print(f"Error message: {str(e)}")
     import traceback
-    print("\n完整堆栈:")
+    print("\nFull traceback:")
     traceback.print_exc()
     print("="*80 + "\n")
 

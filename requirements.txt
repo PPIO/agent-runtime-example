@@ -1,5 +1,5 @@
 # PPIO Agent Runtime
-ppio-sandbox==1.1.0a33
+ppio-sandbox>=1.1.0b1
 
 # LangChain stack
 langgraph>=0.6.7,<0.7.0

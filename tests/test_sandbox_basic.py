@@ -17,11 +17,11 @@ client = PPIOAgentRuntimeClient(
 async def main():
   try:
     print("\n" + "="*80)
-    print("🚀 开始调用 Agent")
+    print("🚀 Starting Agent Invocation")
     print("="*80)
     
     payload = json.dumps({"prompt": "Hello, Agent! Tell me something about Elon Musk."}).encode()
-    print(f"📤 发送 Payload: {payload.decode()}")
+    print(f"📤 Sending Payload: {payload.decode()}")
     print(f"🎯 Agent ID: {os.getenv('PPIO_AGENT_ID')}")
     
     response = await client.invoke_agent_runtime(
@@ -32,7 +32,7 @@ async def main():
     )
     
     print("\n" + "="*80)
-    print("✅ 收到响应")
+    print("✅ Response Received")
     print("="*80)
     print(f"Response type: {type(response)}")
     print(f"Response: {response}")
@@ -40,12 +40,12 @@ async def main():
     
   except Exception as e:
     print("\n" + "="*80)
-    print("❌ 调用失败")
+    print("❌ Invocation Failed")
     print("="*80)
-    print(f"错误类型: {type(e).__name__}")
-    print(f"错误信息: {str(e)}")
+    print(f"Error type: {type(e).__name__}")
+    print(f"Error message: {str(e)}")
     import traceback
-    print("\n完整堆栈:")
+    print("\nFull traceback:")
     traceback.print_exc()
     print("="*80 + "\n")
 
