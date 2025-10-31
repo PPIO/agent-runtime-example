@@ -96,10 +96,12 @@ You should see a JSON response with the agent's answer.
 
 ### Deploy to PPIO Agent Runtime
 
-**1. Verify PPIO CLI is installed**
+**1. Install PPIO sandbox CLI (beta) locally**
 
 ```bash
-npx ppio-sandbox-cli@beta --version
+npm install ppio-sandbox-cli@beta
+
+npx ppio-sandbox-cli --version
 ```
 
 **2. Configure your agent**
@@ -107,7 +109,7 @@ npx ppio-sandbox-cli@beta --version
 Run the interactive configuration (first deployment only):
 
 ```bash
-npx ppio-sandbox-cli@beta agent configure
+npx ppio-sandbox-cli agent configure
 ```
 
 The CLI creates three files:
@@ -118,7 +120,7 @@ The CLI creates three files:
 **3. Deploy to PPIO cloud**
 
 ```bash
-npx ppio-sandbox-cli@beta agent launch
+npx ppio-sandbox-cli agent launch
 ```
 
 After deployment succeeds, `.ppio-agent.yaml` contains your agent ID:
@@ -135,7 +137,7 @@ status:
 Invoke your deployed agent:
 
 ```bash
-npx ppio-sandbox-cli@beta agent invoke "Hello, Agent!"
+npx ppio-sandbox-cli agent invoke "Hello, Agent!" --env PPIO_AGENT_API_KEY="<your-api-key>"
 ```
 
 The CLI reads `agent_id` automatically from `.ppio-agent.yaml`.

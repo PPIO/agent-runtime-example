@@ -96,10 +96,12 @@ bash tests/test_local_basic.sh
 
 ### 部署到 PPIO Agent Runtime
 
-**1. 验证 PPIO CLI 已安装**
+**1. 本地安装 PPIO sandbox CLI (beta)**
 
 ```bash
-npx ppio-sandbox-cli@beta --version
+npm install ppio-sandbox-cli@beta
+
+npx ppio-sandbox-cli --version
 ```
 
 **2. 配置 Agent**
@@ -107,7 +109,7 @@ npx ppio-sandbox-cli@beta --version
 运行交互式配置（仅首次部署）：
 
 ```bash
-npx ppio-sandbox-cli@beta agent configure
+npx ppio-sandbox-cli agent configure
 ```
 
 CLI 会创建三个文件：
@@ -118,7 +120,7 @@ CLI 会创建三个文件：
 **3. 部署到 PPIO 云端**
 
 ```bash
-npx ppio-sandbox-cli@beta agent launch
+npx ppio-sandbox-cli agent launch
 ```
 
 部署成功后，`.ppio-agent.yaml` 包含你的 Agent ID：
@@ -135,7 +137,7 @@ status:
 调用已部署的 Agent：
 
 ```bash
-npx ppio-sandbox-cli@beta agent invoke "Hello, Agent!"
+npx ppio-sandbox-cli agent invoke "Hello, Agent!" --env PPIO_AGENT_API_KEY="<your-api-key>"
 ```
 
 CLI 会自动从 `.ppio-agent.yaml` 读取 `agent_id`。
